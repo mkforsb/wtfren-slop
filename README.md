@@ -1,7 +1,7 @@
 # wtfren
 
 A Rust/Iced desktop app where Claude Code walks you through a codebase, file by file.
-It is derived from `reviewfren`.
+It is derived from [reviewfren](https://github.com/mkforsb/reviewfren-slop).
 
 ```
 cargo run --release                # start on the directory picker
