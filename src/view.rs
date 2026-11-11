@@ -9,7 +9,7 @@ use crate::style::{self, small};
 use crate::tracker::Tracker;
 use iced::widget::text_editor::{Binding, KeyPress};
 use iced::widget::{
-    Space, button, center, column, combo_box, container, markdown, mouse_area, opaque, row, scrollable, slider, stack, text,
+    Space, button, center, column, combo_box, container, markdown, mouse_area, opaque, row, rule, scrollable, slider, stack, text,
     text_editor, text_input, toggler, tooltip,
 };
 use iced::{Alignment, Element, Fill, Font, Length, Padding, Theme};
@@ -907,8 +907,8 @@ fn settings_view<'a>(ed: &'a SettingsEditor, saved_ui_font: &'a str) -> El<'a> {
             .into()
     }
     let help = |s: &'static str| text(s).size(12).style(|t: &Theme| text::Style { color: Some(style::muted(t)) });
-    let mut col = column![
-        row![text("Settings").size(20), Space::new().width(Fill), btn("Close").on_press(Message::CloseSettings)].align_y(Alignment::Center),
+    let col = column![
+        text("Settings").size(20),
         row![text("Dark theme").size(15).width(Fill), toggler(ed.dark_theme).on_toggle(Message::SettingsDarkTheme)].align_y(Alignment::Center),
         row![
             column![
@@ -950,10 +950,13 @@ fn settings_view<'a>(ed: &'a SettingsEditor, saved_ui_font: &'a str) -> El<'a> {
         small(format!("Saved to {}", crate::settings::Settings::path().display())),
     ]
     .spacing(8);
+    // The action bar sits outside the scrollable so it stays visible at any scroll position.
+    // Save errors go here too, so they're seen without scrolling.
+    let mut footer = column![].spacing(8);
     if let Some(e) = &ed.error {
-        col = col.push(style::error_box(e, None));
+        footer = footer.push(style::error_box(e, None));
     }
-    col = col.push(
+    footer = footer.push(
         row![
             btn("Reset to defaults").on_press(Message::ResetSettings),
             Space::new().width(Fill),
@@ -962,10 +965,17 @@ fn settings_view<'a>(ed: &'a SettingsEditor, saved_ui_font: &'a str) -> El<'a> {
         ]
         .spacing(8),
     );
-    container(scrollable(container(col).padding(Padding { right: 14.0, ..Padding::ZERO })))
-        .padding(20)
-        .width(820)
-        .max_height(860)
-        .style(style::modal)
-        .into()
+    container(
+        column![
+            scrollable(container(col).padding(Padding { right: 14.0, bottom: 4.0, ..Padding::ZERO })).height(Fill),
+            rule::horizontal(1),
+            footer,
+        ]
+        .spacing(12),
+    )
+    .padding(20)
+    .width(820)
+    .max_height(860)
+    .style(style::modal)
+    .into()
 }
